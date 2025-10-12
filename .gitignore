@@ -1,0 +1,33 @@
+# Dataset (don't upload large files!)
+cat/
+dog/
+annotation/
+src_points/
+*.png
+*.jpg
+*.jpeg
+
+# Checkpoints and models
+*.pth
+*.pt
+checkpoint_*.pth
+best_*.pth
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Output
+analysis_output/
+*.csv
+training_history.json
+training_history.png
