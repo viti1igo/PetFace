@@ -86,6 +86,75 @@ class CatPairDataset(Dataset):
         
         return img1, img2, torch.tensor(label, dtype=torch.float32)
     
+class CatTripletDataset(Dataset):
+    def __init__(self, image_paths, labels, transform=None, 
+                 subset_size=5000, triplets_per_epoch=20000):
+        self.image_paths = image_paths
+        self.labels = labels
+        self.transform = transform
+        self.subset_size = subset_size
+        self.triplets_per_epoch = triplets_per_epoch
+        
+        # Group images by cat ID
+        self.cat_groups = defaultdict(list)
+        for i, label in enumerate(labels):
+            self.cat_groups[label].append(i)
+        
+        self.cat_ids = list(self.cat_groups.keys())
+        print(f'Total cats: {len(self.cat_ids)}')
+        print(f'Total images: {len(image_paths)}')
+        
+        # Generate triplets
+        self._generate_triplets()
+    
+    def _generate_triplets(self):
+        """
+        Generate triplets (anchor, positive, negative)
+        """
+        self.triplets = []
+        
+        # Sample subset of cats
+        selected_cats = random.sample(self.cat_ids, 
+                                    min(self.subset_size, 
+                                    len(self.cat_ids)))
+        
+        print(f'Sampling from {len(selected_cats)} cats...')
+
+        # Generate triplets
+        for _ in tqdm(range(self.triplets_per_epoch), desc="Generating triplets"):
+            # Anchor and positive from same cat
+            anchor_cat = random.choice(selected_cats)
+            anchor_images = self.cat_groups[anchor_cat]
+            if len(anchor_images) < 2:
+                continue
+
+            anchor_idx, positive_idx = random.sample(anchor_images, 2)
+
+            # Negative from different cat
+            negative_cat = random.choice([cat for cat in selected_cats if cat != anchor_cat])
+            negative_idx = random.choice(self.cat_groups[negative_cat])
+
+            self.triplets.append((anchor_idx, positive_idx, negative_idx))
+
+        print(f'Total triplets generated: {len(self.triplets)}')
+
+    def __len__(self):
+        return len(self.triplets)
+
+    def __getitem__(self, idx):
+        anchor_idx, positive_idx, negative_idx = self.triplets[idx]
+        
+        anchor_image = Image.open(self.image_paths[anchor_idx]).convert('RGB')
+        positive_image = Image.open(self.image_paths[positive_idx]).convert('RGB')
+        negative_image = Image.open(self.image_paths[negative_idx]).convert('RGB')
+        
+        if self.transform:
+            anchor_image = self.transform(anchor_image)
+            positive_image = self.transform(positive_image)
+            negative_image = self.transform(negative_image)
+        
+        return (anchor_image, positive_image, negative_image)  
+
 def load_cat_data(base_path='./cat'):
     """
     Load cat images from PetFace dataset
