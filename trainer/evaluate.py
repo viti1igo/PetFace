@@ -69,7 +69,7 @@ def generate_embeddings(model, dataset, device, max_samples=5000):
 @torch.no_grad()
 def compute_distances(model, dataset, device, num_samples=2000):
     """
-    Compute pairwise distances for verification task.
+    Compute pairwise distances for the verification task.
     
     Args:
         model: Trained embedding network
@@ -171,7 +171,9 @@ def compute_metrics(distances, true_labels):
     return metrics
 
 def plot_confusion_matrix(cm, save_path='confusion_matrix.png'):
-    """Plot and save confusion matrix."""
+    """
+    Plot and save confusion matrix.
+    """
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar_kws={'label': 'Count'},
                 xticklabels=['Different Cat', 'Same Cat'],
@@ -185,7 +187,9 @@ def plot_confusion_matrix(cm, save_path='confusion_matrix.png'):
     print(f"✓ Confusion matrix saved as '{save_path}'")
 
 def plot_roc_curve(fpr, tpr, roc_auc, optimal_threshold, optimal_idx, save_path='roc_curve.png'):
-    """Plot and save ROC curve."""
+    """
+    Plot and save ROC curve.
+    """
     plt.figure(figsize=(10, 8))
     
     plt.plot(fpr, tpr, color='darkorange', lw=3, 
@@ -252,7 +256,7 @@ def plot_distance_distribution(distances, true_labels, optimal_threshold, save_p
 
 def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings'):
     """
-    Generate and plot t-SNE visualization.
+    Generate and plot t-SNE visualisation.
     
     Args:
         embeddings: Array of embeddings
@@ -275,7 +279,7 @@ def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings')
     
     print("✓ t-SNE completed!")
     
-    # Plot 1: Top N cats with different colors
+    # Plot 1: Top N cats with different colours
     cat_counts = Counter(cat_ids)
     top_cats = [cat for cat, count in cat_counts.most_common(n_top_cats)]
     
@@ -422,7 +426,7 @@ DISTANCE ANALYSIS:
     
     print("✓ Evaluation summary saved as 'evaluation_summary.txt'")
     print("\n" + "="*70)
-    print("✅ EVALUATION COMPLETE!")
+    print("EVALUATION COMPLETE!")
     print("="*70)
     
     return metrics
