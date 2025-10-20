@@ -6,6 +6,7 @@ src_points/
 *.png
 *.jpg
 *.jpeg
+*.txt
 
 # Checkpoints and models
 *.pth
@@ -31,3 +32,5 @@ analysis_output/
 *.csv
 training_history.json
 training_history.png
+evaluation_summary.txt
+annotations/README.md

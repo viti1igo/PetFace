@@ -18,17 +18,17 @@ from sklearn.manifold import TSNE
 from scipy import stats
 
 @torch.no_grad()
-def generate_embeddings(model, dataset, device, max_samples=5000):
+def generate_embeddings(model, dataset, device, max_samples=100000):
     """
     Generate embeddings for validation dataset.
     
-    Args:
+    PARAMS:
         model: Trained embedding network
         dataset: CatTripletDataset instance
         device: torch device (cuda/cpu)
         max_samples: Maximum number of triplets to process
         
-    Returns:
+    RETURNS:
         embeddings: numpy array of shape (N, embedding_dim)
         cat_ids: numpy array of cat IDs corresponding to embeddings
     """
@@ -71,13 +71,13 @@ def compute_distances(model, dataset, device, num_samples=2000):
     """
     Compute pairwise distances for the verification task.
     
-    Args:
+    PARAMS:
         model: Trained embedding network
         dataset: CatTripletDataset instance
         device: torch device
         num_samples: Number of triplets to sample
         
-    Returns:
+    RETURNS:
         distances: Array of distances
         labels: Array of labels (1=same cat, 0=different cat)
     """
@@ -92,8 +92,6 @@ def compute_distances(model, dataset, device, num_samples=2000):
     
     for idx in tqdm(indices, desc="Computing distances"):
         anchor, positive, negative = dataset[idx]
-        
-        # Move to device
         anchor = anchor.unsqueeze(0).to(device)
         positive = positive.unsqueeze(0).to(device)
         negative = negative.unsqueeze(0).to(device)
@@ -122,11 +120,11 @@ def compute_metrics(distances, true_labels):
     """
     Compute verification metrics with optimal threshold.
     
-    Args:
+    PARAMS:
         distances: Array of pairwise distances
         true_labels: Ground truth labels (1=same, 0=different)
         
-    Returns:
+    RETURNS:
         dict with all metrics and optimal threshold
     """
     # ROC Curve (negative distances because lower = more similar)
@@ -136,11 +134,9 @@ def compute_metrics(distances, true_labels):
     # Find optimal threshold using Youden's J statistic
     optimal_idx = np.argmax(tpr - fpr)
     optimal_threshold = -thresholds[optimal_idx]
-    
-    # Predictions using optimal threshold
     predictions = (distances < optimal_threshold).astype(int)
     
-    # Compute classification metrics
+    # Classification metrics
     accuracy = accuracy_score(true_labels, predictions)
     precision = precision_score(true_labels, predictions)
     recall = recall_score(true_labels, predictions)
@@ -220,18 +216,18 @@ def plot_distance_distribution(distances, true_labels, optimal_threshold, save_p
     pos_distances = distances[true_labels == 1]
     neg_distances = distances[true_labels == 0]
     
-    # Histogram
-    axes[0].hist(pos_distances, bins=50, alpha=0.7, label='Same Cat (Positive)', 
-                 color='green', edgecolor='black', linewidth=1.2)
-    axes[0].hist(neg_distances, bins=50, alpha=0.7, label='Different Cat (Negative)', 
-                 color='red', edgecolor='black', linewidth=1.2)
-    axes[0].axvline(optimal_threshold, color='blue', linestyle='--', linewidth=2.5, 
-                    label=f'Threshold = {optimal_threshold:.3f}')
-    axes[0].set_xlabel('Euclidean Distance', fontsize=12)
-    axes[0].set_ylabel('Frequency', fontsize=12)
-    axes[0].set_title('Distance Distribution - Histogram', fontsize=13, fontweight='bold')
-    axes[0].legend(fontsize=10)
-    axes[0].grid(alpha=0.3)
+    # # Histogram
+    # axes[0].hist(pos_distances, bins=50, alpha=0.7, label='Same Cat (Positive)', 
+    #              color='green', edgecolor='black', linewidth=1.2)
+    # axes[0].hist(neg_distances, bins=50, alpha=0.7, label='Different Cat (Negative)', 
+    #              color='red', edgecolor='black', linewidth=1.2)
+    # axes[0].axvline(optimal_threshold, color='blue', linestyle='--', linewidth=2.5, 
+    #                 label=f'Threshold = {optimal_threshold:.3f}')
+    # axes[0].set_xlabel('Euclidean Distance', fontsize=12)
+    # axes[0].set_ylabel('Frequency', fontsize=12)
+    # axes[0].set_title('Distance Distribution - Histogram', fontsize=13, fontweight='bold')
+    # axes[0].legend(fontsize=10)
+    # axes[0].grid(alpha=0.3)
     
     # KDE Plot
     pos_kde = stats.gaussian_kde(pos_distances)
@@ -258,7 +254,7 @@ def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings')
     """
     Generate and plot t-SNE visualisation.
     
-    Args:
+    PARAMS:
         embeddings: Array of embeddings
         cat_ids: Array of cat IDs
         n_top_cats: Number of top cats to highlight
@@ -277,7 +273,7 @@ def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings')
     tsne = TSNE(n_components=2, random_state=42, perplexity=30, max_iter=1000)
     tsne_results = tsne.fit_transform(embeddings)
     
-    print("✓ t-SNE completed!")
+    print("t-SNE completed!")
     
     # Plot 1: Top N cats with different colours
     cat_counts = Counter(cat_ids)
@@ -306,7 +302,7 @@ def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings')
     plt.tight_layout()
     plt.savefig(f'{save_prefix}_top{n_top_cats}.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ t-SNE plot (top {n_top_cats}) saved")
+    print(f"t-SNE plot (top {n_top_cats}) saved")
     
     # Plot 2: All cats with color gradient
     fig, ax = plt.subplots(figsize=(12, 10))
@@ -328,12 +324,12 @@ def plot_tsne(embeddings, cat_ids, n_top_cats=20, save_prefix='tsne_embeddings')
     plt.close()
     print(f"✓ t-SNE plot (all cats) saved")
 
-def evaluate_model(model, dataset, device, config=None, num_distance_samples=2000, 
-                   num_embedding_samples=3000):
+def evaluate_model(model, dataset, device, config=None, num_distance_samples=5000, 
+                   num_embedding_samples=10000):
     """
     Run comprehensive evaluation on trained model.
     
-    Args:
+    PARAMS:
         model: Trained embedding network
         dataset: CatTripletDataset for validation
         device: torch device
@@ -341,11 +337,11 @@ def evaluate_model(model, dataset, device, config=None, num_distance_samples=200
         num_distance_samples: Samples for distance computation
         num_embedding_samples: Samples for embedding generation
         
-    Returns:
+    RETURNS:
         metrics: Dictionary with all computed metrics
     """
     print("\n" + "="*70)
-    print("STARTING COMPREHENSIVE EVALUATION")
+    print("STARTING EVALUATION")
     print("="*70)
     
     # 1. Generate embeddings
@@ -372,7 +368,6 @@ def evaluate_model(model, dataset, device, config=None, num_distance_samples=200
     print(f"Optimal Threshold: {metrics['optimal_threshold']:.4f}")
     print(f"{'='*60}")
     
-    # 4. Generate visualizations
     print("\n[4/5] Generating visualizations...")
     
     # Confusion matrix
@@ -393,29 +388,23 @@ def evaluate_model(model, dataset, device, config=None, num_distance_samples=200
     print("\n[5/5] Generating summary report...")
     
     summary = f"""
-{'='*70}
-COMPREHENSIVE EVALUATION SUMMARY
-{'='*70}
+EVALUATION SUMMARY
 
 Model: EfficientNet-B0 with Triplet Loss
 Embedding Dimension: {embeddings.shape[1]}
 
-VERIFICATION METRICS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  • Accuracy:   {metrics['accuracy']:.4f} ({metrics['accuracy']*100:.2f}%)
+METRICS:
+  • Accuracy:   {metrics['accuracy']:.4f} 
   • Precision:  {metrics['precision']:.4f}
   • Recall:     {metrics['recall']:.4f}
   • F1-Score:   {metrics['f1_score']:.4f}
   • ROC-AUC:    {metrics['roc_auc']:.4f}
 
 DISTANCE ANALYSIS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   • Optimal Threshold:       {metrics['optimal_threshold']:.4f}
   • Same Cat Mean Dist:      {metrics['pos_dist_mean']:.4f} ± {metrics['pos_dist_std']:.4f}
   • Different Cat Mean Dist: {metrics['neg_dist_mean']:.4f} ± {metrics['neg_dist_std']:.4f}
   • Distance Separation:     {metrics['distance_separation']:.4f}
-
-{'='*70}
 """
     
     print(summary)
