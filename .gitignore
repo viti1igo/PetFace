@@ -9,10 +9,10 @@ src_points/
 *.txt
 
 # Checkpoints and models
-*.pth
-*.pt
-checkpoint_*.pth
-best_*.pth
+# *.pth
+# *.pt
+# checkpoint_*.pth
+# best_*.pth
 
 # Jupyter
 .ipynb_checkpoints/
