@@ -1,4 +1,4 @@
-# CAT FACE RECOGNITION 
+# CAT FACE RECOGNITION WITH FEW-SHOT LEARNING
 ## Overview
 This is a base Siamese Network from the paper by Koch et al. (2015) to do the Face Recognition for CATS using the PetFace dataset.
 - **Goal:** To achieve robust identification of individual cats from visual inputs, utilising a few annotated images per animal.
