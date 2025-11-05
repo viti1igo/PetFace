@@ -6,8 +6,11 @@ This is a base Siamese Network from the paper by Koch et al. (2015) to do the Fa
 - **Model:** The Siamese network extracts and compares dense feature embeddings using a triplet-loss approach.
 - **Output:** Produces a low-dimensional embedding for each input and uses distance metrics (e.g., Euclidean, cosine) for similarity-based identification.
 
-## Model Architecture
+## Demo
+An interactive demonstration application built to showcase the identification model in action is available at: [https://github.com/MarkusMitteregger/PetFace_Demo](https://github.com/MarkusMitteregger/PetFace_Demo)
+The demo illustrates how the trained model can be embedded into a prototype user interface (e.g., with webcam input or GUI) and used in a smart-feeder context for visual recognition of pets.
 
+## Model Architecture
 - Siamese Network built on EfficientNet-B0 with shared weights.
 - Embedding head includes:
   - Two fully connected layers (128, then 224 units)
